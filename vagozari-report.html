@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>وضعیت تغییرات سیستم واگذاری اختیاری</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* طرح: سه بخش شماره‌دار با سربرگ مشکی‌ـ‌طلایی؛ هر وضعیت رنگ خودش را دارد و هیچ وضعیتی با دیگری ادغام نمی‌شود */
+:root{
+  --gold:#f0b323; --gold-deep:#a87a00; --ink:#1c1a17; --ink-2:#2b2824;
+  --bg:#efeee9; --surface:#ffffff; --surface-2:#f7f6f2; --line:#e1ddd2; --line-2:#cfc9bb;
+  --text:#1c1a17; --muted:#6a655b; --danger:#c0392b; --edit:#fff8e6;
+  --s-done:#2e9e6b; --s-exists:#2389a6; --s-inprog:#e9a700; --s-meeting:#e06a1b;
+  --s-print:#8459c0; --s-sanad:#c2428a; --s-rejected:#7d828c; --s-other:#4f6bd6;
+  --font:"Vazirmatn",Tahoma,"Segoe UI",sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#131210; --surface:#1e1c19; --surface-2:#262420; --line:#37332c; --line-2:#4a453b; --ink-2:#2b2824;
+    --text:#f1eee6; --muted:#a8a295; --gold-deep:#f0b323; --edit:#2c2617; --danger:#ef7a6c;
+    --s-done:#46c088; --s-exists:#3fb0cf; --s-inprog:#f3bd2e; --s-meeting:#f58a3c;
+    --s-print:#a985e0; --s-sanad:#e06aae; --s-rejected:#9da2ab; --s-other:#7d94ee;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#131210; --surface:#1e1c19; --surface-2:#262420; --line:#37332c; --line-2:#4a453b; --ink-2:#2b2824;
+  --text:#f1eee6; --muted:#a8a295; --gold-deep:#f0b323; --edit:#2c2617; --danger:#ef7a6c;
+  --s-done:#46c088; --s-exists:#3fb0cf; --s-inprog:#f3bd2e; --s-meeting:#f58a3c;
+  --s-print:#a985e0; --s-sanad:#e06aae; --s-rejected:#9da2ab; --s-other:#7d94ee;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:15px;line-height:1.8;font-variant-numeric:tabular-nums}
+body.editing{padding-bottom:86px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.5}
+
+/* سربرگ صفحه */
+.band{background:var(--ink);color:#f6f2e7;border-bottom:5px solid var(--gold)}
+.band-in{max-width:1180px;margin:0 auto;padding:26px 20px 22px;display:flex;gap:18px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap}
+.eyebrow{color:var(--gold);font-weight:700;font-size:13px}
+.band h1{font-size:clamp(20px,3.2vw,30px);font-weight:800}
+.band p{margin:6px 0 0;color:#c9c3b4;font-size:13.5px}
+.band-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tag{border:1px solid #4a453b;border-radius:999px;padding:3px 14px;font-size:13px;color:#e9e3d3}
+.tag b{color:var(--gold);font-weight:700}
+.editbtn{background:var(--gold);color:var(--ink);border:0;border-radius:999px;padding:5px 18px;font-weight:800;font-size:13.5px}
+.editbtn:hover{filter:brightness(1.08)}
+
+main{max-width:1180px;margin:0 auto;padding:24px 20px 40px;display:flex;flex-direction:column;gap:26px}
+
+/* بخش‌های اصلی: هر بخش قاب و سربرگ شماره‌دار خودش را دارد */
+.sec{background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.03)}
+.sec-h{display:flex;align-items:center;gap:14px;padding:14px 20px;background:var(--ink-2);color:#f6f2e7;border-bottom:3px solid var(--gold)}
+.sec-n{flex:none;width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--ink);display:grid;place-items:center;font-weight:800;font-size:16px}
+.sec-h h2{font-size:18px;font-weight:800}
+.sec-h p{margin:0;color:#c9c3b4;font-size:13px;line-height:1.6}
+.sec-b{padding:20px}
+
+/* بخش ۱: خلاصه وضعیت */
+.overview{display:grid;grid-template-columns:280px minmax(0,1fr);gap:26px;align-items:center}
+.donut-wrap{position:relative;max-width:270px;margin:0 auto;width:100%}
+.donut{width:100%;display:block;transform:rotate(-90deg)}
+.donut circle{fill:none;stroke-width:6.5;cursor:pointer;transition:stroke-width .15s, opacity .15s}
+.donut circle:hover,.donut circle.on{stroke-width:8.5}
+.donut.has-sel circle:not(.on){opacity:.3}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;text-align:center}
+.donut-c .n{font-size:40px;font-weight:800;line-height:1.2}
+.donut-c .t{font-size:13px;color:var(--muted);max-width:58%;line-height:1.5}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{min-width:0;display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;text-align:right;
+  background:color-mix(in srgb,var(--c) 8%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 30%,var(--line));
+  border-inline-start:7px solid var(--c);border-radius:10px;padding:10px 14px;transition:box-shadow .15s, transform .15s}
+.tile:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.tile[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c)}
+.tile .name{font-weight:700;font-size:14px;line-height:1.6}
+.tile .pct{font-weight:800;font-size:22px;line-height:1.2}
+.tile .cnt{grid-column:1/-1;font-size:12.5px;color:var(--muted)}
+.tile .track{grid-column:1/-1;height:6px;border-radius:3px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.tile .track i{display:block;height:100%;background:var(--c);transition:width .3s}
+
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:20px;padding-top:18px;border-top:1px dashed var(--line-2)}
+.ins{background:var(--surface-2);border:1px solid var(--line);border-inline-start:4px solid var(--ic,var(--gold));border-radius:10px;padding:10px 14px;font-size:14px}
+.ins .k{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.ins b{font-weight:800}
+
+/* بخش ۲: زیرسیستم‌ها */
+.subs{display:flex;flex-direction:column}
+.sub{display:grid;grid-template-columns:30px minmax(170px,280px) 1fr 96px;gap:14px;align-items:center;padding:10px 4px;border-bottom:1px solid var(--line)}
+.sub:nth-child(even){background:var(--surface-2)}
+.sub:last-child{border-bottom:0}
+.sub .ix{font-weight:800;color:var(--muted);font-size:13px;text-align:center}
+.sub-name{background:none;border:0;padding:2px 6px;border-radius:8px;text-align:right;font-weight:700;font-size:14px;line-height:1.6}
+.sub-name:hover{color:var(--gold-deep);text-decoration:underline;text-underline-offset:4px}
+.sub-name small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;text-decoration:none}
+.bar{display:flex;height:28px;border-radius:7px;overflow:hidden;gap:2px;background:var(--surface-2)}
+.seg{border:0;padding:0;min-width:14px;background:var(--c);color:var(--on,#fff);font-weight:800;font-size:13px;transition:filter .15s}
+.seg:hover{filter:brightness(1.12)}
+.sub-pct{font-weight:800;font-size:14px;text-align:left;white-space:nowrap;color:var(--s-done)}
+.sub-pct small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line-2);font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:3px;background:var(--c);flex:none;display:inline-block}
+
+/* بخش ۳: شرح نیازمندی */
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:14px 20px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+#q{flex:1 1 240px;border:1px solid var(--line-2);background:var(--surface);border-radius:10px;padding:8px 14px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 20px 0}
+.filters:empty{display:none}
+.chip{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:13px;display:inline-flex;gap:8px;align-items:center}
+.chip:hover{border-color:var(--gold)}
+.btn{border:1px solid var(--ink);background:var(--ink);color:#f6f2e7;border-radius:10px;padding:7px 16px;font-size:13.5px;font-weight:700}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--line-2)}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.btn:hover{border-color:var(--gold)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.edit-only{display:none!important}
+body.editing .edit-only{display:inline-flex!important}
+.count{color:var(--muted);font-size:13.5px;padding:10px 20px 0}
+.systems{display:flex;flex-direction:column;gap:14px;padding:14px 20px 20px}
+
+/* قاب هر زیرسیستم */
+.sys{border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.sys-h{display:flex;align-items:stretch;background:var(--surface);border-bottom:1px solid transparent}
+.sys.open .sys-h{border-bottom-color:var(--line-2)}
+.sys-t{flex:1;min-width:0;display:grid;grid-template-columns:auto minmax(0,1fr) minmax(120px,220px) auto;gap:14px;align-items:center;background:none;border:0;padding:12px 16px;text-align:right}
+.sys-t:hover{background:var(--surface-2)}
+.sys-ix{width:38px;height:38px;border-radius:10px;background:var(--ink);color:var(--gold);display:grid;place-items:center;font-weight:800;font-size:14px}
+.sys-name{font-weight:800;font-size:15.5px;line-height:1.6}
+.sys-name small{display:block;font-weight:500;color:var(--muted);font-size:12.5px}
+.sys-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px;background:var(--line)}
+.sys-bar i{display:block;background:var(--c)}
+.chev{width:28px;height:28px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;font-size:13px;transition:transform .2s;color:var(--muted)}
+.sys.open .chev{transform:rotate(180deg)}
+.sys-add{border:0;border-inline-start:1px solid var(--line);background:var(--gold);color:var(--ink);font-weight:800;font-size:13px;padding:0 14px}
+.sys-body{display:none;padding:14px;flex-direction:column;gap:10px}
+.sys.open .sys-body{display:flex}
+
+/* کارت هر نیازمندی */
+.req{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:8px 14px;align-items:start;background:var(--surface);border:1px solid var(--line);border-inline-start:6px solid var(--c);border-radius:10px;padding:12px 14px}
+.req .no{width:30px;height:30px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line-2);display:grid;place-items:center;font-weight:800;font-size:12.5px;color:var(--muted)}
+.req .tx{max-width:78ch;white-space:pre-line;padding-top:2px}
+.pill{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700;max-width:250px;line-height:1.7;
+  background:color-mix(in srgb,var(--c) 14%,var(--surface));color:var(--text);border:1px solid color-mix(in srgb,var(--c) 45%,var(--line))}
+.pill .dot{width:8px;height:8px;border-radius:50%}
+.note{grid-column:2/-1;background:color-mix(in srgb,var(--gold) 9%,var(--surface));border:1px solid color-mix(in srgb,var(--gold) 35%,var(--line));border-radius:8px;padding:8px 12px;font-size:13.5px;white-space:pre-line}
+.note b{display:block;font-size:12px;color:var(--gold-deep);font-weight:800}
+.empty{padding:26px;text-align:center;color:var(--muted)}
+
+/* حالت ویرایش ردیف */
+.req.ed{grid-template-columns:36px minmax(0,1fr) 250px}
+.req.dirty{background:var(--edit);box-shadow:0 0 0 2px var(--gold)}
+.req.new{box-shadow:0 0 0 2px var(--s-done)}
+.req.removed{opacity:.5}
+.req.removed .tx-in{text-decoration:line-through}
+.req .side{display:flex;flex-direction:column;gap:8px}
+.req select{width:100%;border:1px solid var(--line);border-inline-start:6px solid var(--c);background:var(--surface-2);border-radius:8px;padding:5px 8px;font-size:13.5px;font-weight:700}
+.req textarea{width:100%;border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:6px 10px;resize:vertical;min-height:58px;line-height:1.7}
+.req textarea.nt{grid-column:2/3;min-height:38px;font-size:13.5px}
+.req .rm{align-self:flex-start;background:none;border:1px solid var(--line);border-radius:8px;padding:2px 10px;font-size:12.5px;color:var(--danger)}
+.req .rm:hover{border-color:var(--danger)}
+.lbl-s{font-size:12px;color:var(--muted)}
+
+/* نوار ویرایش */
+.editbar{position:fixed;inset-inline:0;bottom:0;z-index:20;background:var(--ink);color:#f6f2e7;border-top:4px solid var(--gold);display:none}
+body.editing .editbar{display:block}
+.editbar-in{max-width:1180px;margin:0 auto;padding:12px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.editbar .state{flex:1 1 220px;font-size:14px}
+.editbar .state b{color:var(--gold)}
+.editbar .btn.ghost{color:#f6f2e7;border-color:#4a453b}
+
+/* پنجره */
+.modal{position:fixed;inset:0;z-index:30;background:rgba(15,14,12,.55);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.dlg{background:var(--surface);color:var(--text);border-radius:var(--r);border-top:5px solid var(--gold);width:100%;max-width:440px;padding:22px;display:flex;flex-direction:column;gap:12px;max-height:90vh;overflow:auto}
+.dlg h3{font-size:17px;font-weight:800}
+.dlg label{display:flex;flex-direction:column;gap:4px;font-size:13.5px;font-weight:700}
+.dlg input{border:1px solid var(--line);background:var(--surface-2);border-radius:10px;padding:8px 12px;font-weight:400}
+.dlg .row{display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap}
+.dlg .err{color:var(--danger);font-size:13.5px;min-height:1em}
+.hint{color:var(--muted);font-size:13px}
+.hist{display:flex;flex-direction:column;gap:8px}
+.hist div{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13.5px}
+.toast{position:fixed;z-index:40;top:16px;inset-inline:0;margin:0 auto;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:#f6f2e7;border:1px solid var(--gold);border-radius:10px;padding:8px 18px;font-size:14px;display:none}
+.toast.show{display:block}
+.toast.bad{border-color:var(--danger)}
+
+footer{max-width:1180px;margin:0 auto;padding:0 20px 34px;color:var(--muted);font-size:12.5px}
+
+@media (max-width:900px){
+  .overview{grid-template-columns:1fr}
+  .insights{grid-template-columns:1fr}
+  .sub{grid-template-columns:26px 1fr 80px}
+  .sub .bar{grid-column:2/-1;grid-row:2}
+  .sys-t{grid-template-columns:auto minmax(0,1fr) auto}
+  .sys-bar{grid-column:2/3;grid-row:2}
+  .req.ed{grid-template-columns:30px minmax(0,1fr)}
+  .req.ed .side{grid-column:2}
+  .req textarea.nt{grid-column:2}
+}
+@media (max-width:560px){
+  .tiles{grid-template-columns:1fr}
+  .req{grid-template-columns:30px minmax(0,1fr)}
+  .req .pill{grid-column:2;justify-self:start}
+  .note{grid-column:2}
+  .sec-b,.systems{padding-inline:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="band-in">
+    <div>
+      <div class="eyebrow">گزارش تحلیلی · اتکایی واگذاری اختیاری</div>
+      <h1>آخرین وضعیت بندهای تغییرات و اصلاحات اعلامی زیر سیستم واگذاری اختیاری</h1>
+      <p>روی هر وضعیت کلیک کنید تا شرح نیازمندی‌های همان مورد در بخش ۳ باز شود.</p>
+    </div>
+    <div class="band-meta">
+      <span class="tag">آخرین به‌روزرسانی <b id="upd"></b></span>
+      <span class="tag"><b id="tcount"></b> نیازمندی در <b id="ccount"></b>بخش زیرسیستم واگذاری اختیاری</span>
+      <button class="editbtn" id="editbtn" type="button">ویرایش وضعیت‌ها</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="sec" aria-labelledby="h1s">
+    <div class="sec-h"><span class="sec-n">۱</span><div><h2 id="h1s">خلاصه وضعیت</h2><p>سهم هر وضعیت از کل نیازمندی‌ها؛ هر وضعیت جداگانه شمرده شده است.</p></div></div>
+    <div class="sec-b">
+      <div class="overview">
+        <div class="donut-wrap">
+          <svg class="donut" id="donut" viewBox="0 0 42 42" role="img" aria-label="نمودار حلقه‌ای وضعیت نیازمندی‌ها"></svg>
+          <div class="donut-c"><div class="n" id="dn"></div><div class="t" id="dt"></div></div>
+        </div>
+        <div class="tiles" id="tiles"></div>
+      </div>
+      <div class="insights" id="insights"></div>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h2s">
+    <div class="sec-h"><span class="sec-n">۲</span><div><h2 id="h2s">وضعیت به تفکیک زیرسیستم</h2><p>هر نوار ترکیب وضعیت‌های یک زیرسیستم است. عدد سبز سمت چپ فقط سهم «انجام شده روی محیط داخلی» است.</p></div></div>
+    <div class="sec-b">
+      <div class="subs" id="subs"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="details" aria-labelledby="h3s">
+    <div class="sec-h"><span class="sec-n">۳</span><div><h2 id="h3s">شرح نیازمندی</h2><p>نیازمندی‌ها به تفکیک زیرسیستم. روی سربرگ هر زیرسیستم بزنید تا باز یا بسته شود.</p></div></div>
+    <div class="tools">
+      <input id="q" type="search" placeholder="جست‌وجو در شرح نیازمندی و توضیحات…" aria-label="جست‌وجو">
+      <button class="btn ghost" id="toggleall" type="button">باز کردن همه</button>
+      <button class="btn ghost" id="clear" type="button">حذف فیلترها</button>
+      <button class="btn gold edit-only" id="addcat" type="button">+ زیرسیستم جدید</button>
+      <button class="btn ghost edit-only" id="upbtn" type="button">جایگزینی با اکسل</button>
+      <input id="file" type="file" accept=".xlsx,.xls" hidden>
+    </div>
+    <div class="filters" id="chips"></div>
+    <div class="count" id="count"></div>
+    <div class="systems" id="list"></div>
+  </section>
+</main>
+
+<footer>
+  همه‌ی اعداد از روی وضعیت تک‌تک نیازمندی‌ها محاسبه می‌شوند و هر وضعیت جداگانه شمرده شده است.
+  «انجام شده روی محیط داخلی» به معنی استقرار در محیط عملیاتی نیست.
+</footer>
+
+<div class="editbar" role="region" aria-label="نوار ویرایش">
+  <div class="editbar-in">
+    <div class="state" id="estate"></div>
+    <button class="btn gold" id="save" type="button">ذخیره و انتشار</button>
+    <button class="btn ghost" id="discard" type="button">لغو تغییرات</button>
+    <button class="btn ghost" id="histbtn" type="button">نسخه‌های قبلی</button>
+    <button class="btn ghost" id="exit" type="button">خروج از ویرایش</button>
+  </div>
+</div>
+
+<div class="modal" id="m-login" role="dialog" aria-modal="true" aria-labelledby="lg-t">
+  <form class="dlg" id="lg-form">
+    <h3 id="lg-t">ورود به حالت ویرایش</h3>
+    <label>نام شما (در تاریخچه ثبت می‌شود)<input id="lg-name" autocomplete="name" maxlength="60" required></label>
+    <label>رمز ویرایش<input id="lg-pw" type="password" autocomplete="current-password" required></label>
+    <div class="err" id="lg-err" role="alert"></div>
+    <div class="row"><button class="btn gold" type="submit" id="lg-go">ورود</button><button class="btn ghost" type="button" data-close>انصراف</button></div>
+  </form>
+</div>
+
+<div class="modal" id="m-cat" role="dialog" aria-modal="true" aria-labelledby="ct-t">
+  <form class="dlg" id="ct-form">
+    <h3 id="ct-t">زیرسیستم جدید</h3>
+    <label>نام زیرسیستم<input id="ct-name" maxlength="200" required></label>
+    <div class="row"><button class="btn gold" type="submit">افزودن</button><button class="btn ghost" type="button" data-close>انصراف</button></div>
+  </form>
+</div>
+
+<div class="modal" id="m-hist" role="dialog" aria-modal="true" aria-labelledby="hs-t">
+  <div class="dlg">
+    <h3 id="hs-t">نسخه‌های قبلی</h3>
+    <p class="hint" style="margin:0">بازگردانی، آن نسخه را به‌عنوان نسخه‌ی جدید منتشر می‌کند. نسخه‌ی فعلی هم در تاریخچه می‌ماند.</p>
+    <div class="hist" id="hs-list"></div>
+    <div class="err" id="hs-err" role="alert"></div>
+    <div class="row"><button class="btn ghost" type="button" data-close>بستن</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var BOOT = {"version": 0, "updatedAt": null, "updatedBy": null, "label": "۱۴۰۵/۰۸/۲۴ (فایل مرجع)", "rows": [{"id": "r1", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "علاوه بر بیمه‌نامه‌ها و الحاقیه‌های صادره، امکان مشاهده و ثبت تحلیل ریسک برای پیش‌نویس‌ها پیش از صدور فراهم شود؛ پیش‌نویس‌ها قابل مشاهده‌اند اما امکان ثبت تحلیل برای آنها وجود ندارد.", "status": "در حال انجام", "note": ""}, {"id": "r2", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "بیمه‌نامه‌های منتخب (به پیوست) با همکاری همکاران ریتون در سرور تست ثبت شوند تا مراحل واگذاری روی آنها آزمایش شود.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r3", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "جست‌وجوی پیشرفته بر اساس سرمایه و حق بیمه اضافه شود.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r4", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "اطلاعات دو گزینه «مشاهده محاسبات» و «انجام محاسبات» یکسان است؛ یکی حذف شود.", "status": "رد درخواست", "note": "با توجه به اینکه دکمه های اشاره شده دارای قابلیت های متفاوت از هم هستند تغییرات اعلام شده در سیستم اعمال نمیگردد و شرایط فعلی حفظ میگردد."}, {"id": "r5", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "فیلدهای پیشنهادی برای حذف: سرمایه واگذاری و سرمایه مانده، و حق بیمه واگذاری و حق بیمه مانده، به تفکیک ریالی و ارزی.", "status": "رد درخواست", "note": "با توجه به اینکه داده های اعلام شده در سناریو اشاره شده بعدا توسط کاربران اداره های واگذاری قرارداد هم مورد استفاده قرار میگیرد تغییرات اعلام شده در سیستم اعمال نمیگردد و شرایط فعلی حفظ میگردد"}, {"id": "r6", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "عنوان «پروفایل ریسک» به «پیش‌نویس بیمه‌نامه‌ها و الحاقیه‌ها» یا «بیمه‌نامه‌ها و الحاقیه‌های صادره» تغییر کند.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r7", "cat": "نمایش بیمه‌نامه‌ها و پیش‌نویس‌ها", "req": "عنوان دکمه «FAC» به «انتخاب جهت تعیین وضعیت واگذاری» تغییر کند و انتقال به مرحله بعد بدون الزام به انتخاب وضعیت نهایی انجام شود.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r8", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "عنوان «بیمه‌نامه‌های پرریسک» به «تعیین وضعیت واگذاری» تغییر کند.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r9", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "وضعیت پیش‌فرض موارد منتقل‌شده، «در انتظار تعیین وضعیت واگذاری» باشد.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r10", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "سابقه تغییر وضعیت (لاگ تاریخ و ساعت شامل کاربر انجام‌دهنده) به‌صورت خودکار ثبت شود.", "status": "در حال انجام", "note": ""}, {"id": "r11", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "گزینه «حذف» به «انتقال به پیش‌نویس‌ها یا بیمه‌نامه‌های صادره» تغییر کند تا رکورد حذف نشود.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r12", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "گزینه «ویرایش» به «تعیین وضعیت واگذاری» تغییر کند با گزینه‌هایی مانند «عدم نیاز به واگذاری» و «انتقال به تحلیل ریسک».", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r13", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "موارد فاقد نیاز به واگذاری با توضیحات و پیوست‌ها نگهداری و قابل فیلتر/گزارش باشند؛ ایجاد سربرگ مستقل «عدم نیاز به واگذاری» پیشنهاد شده.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r14", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "موارد نیازمند واگذاری با پیوست‌ها به مرحله تحلیل ریسک منتقل شوند.", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r15", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "کارتابل «تعیین وضعیت واگذاری» صرفاً شامل موارد در انتظار تعیین وضعیت باشد.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r16", "cat": "تعیین وضعیت واگذاری و ارجاع کار", "req": "سطوح بالاتر (از جمله رئیس اداره) بتوانند کارشناس مسئول پرونده را تعیین و عملیات را ارجاع دهند؛ برای کارشناس نیز هشدار ارسال شود.", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r17", "cat": "تحلیل ریسک جهت واگذاری اختیاری", "req": "عنوان بخش به «تحلیل ریسک جهت انجام واگذاری اختیاری» تغییر کند.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r18", "cat": "تحلیل ریسک جهت واگذاری اختیاری", "req": "انتخاب بیمه‌نامه و الحاقیه از طریق دکمه «ایجاد» و جست‌وجو در همان سربرگ حفظ شود.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r19", "cat": "تحلیل ریسک جهت واگذاری اختیاری", "req": "اتصال مراحل برقرار شود تا پرونده پس از تعیین وضعیت خودکار وارد تحلیل ریسک شود؛ در فایل، ارتباط سربرگ‌ها نامشخص و ظاهراً مستقل توصیف شده است.", "status": "در حال انجام", "note": ""}, {"id": "r20", "cat": "تحلیل ریسک جهت واگذاری اختیاری", "req": "ثبت سابقه تحلیل ریسک یا تأیید آن توسط سطح بالاتر پیش‌بینی شود.", "status": "در حال انجام", "note": ""}, {"id": "r21", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "بیمه‌نامه‌ها و الحاقیه‌های نیازمند واگذاری با درصد تعیین‌شده در سناریوی تحلیل ریسک وارد پرونده‌های واگذاری شوند.", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r22", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "الحاقیه‌ها پیش از اضافه‌شدن به پرونده قبلی، قابلیت تحلیل مجدد ریسک داشته باشند.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r23", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "الحاقیه پس از تحلیل، به‌صورت رکورد قابل شناسایی به پرونده واگذاری مربوط متصل شود.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r24", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "عملیات واگذاری بر اساس سناریوی منتخب مرحله تحلیل ریسک ایجاد شود.", "status": "در حال انجام", "note": ""}, {"id": "r25", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "اطلاعات بیمه‌گران اتکایی و شرایط قبولی برای هر بیمه‌گر به‌صورت مستقل ثبت شود.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r26", "cat": "پرونده‌های واگذاری اختیاری و الحاقیه‌ها", "req": "شرایط خاص پذیرش هر بیمه‌گر در توضیحات همان پذیرش درج شود.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r27", "cat": "خسارت و اتصال آن به پرونده واگذاری", "req": "پرونده‌های خسارت از طریق هشدارهای سامانه شناسایی شوند.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r28", "cat": "خسارت و اتصال آن به پرونده واگذاری", "req": "کاربر بتواند خسارت شناسایی‌شده را به‌صورت رکورد به پرونده واگذاری مربوط متصل کند.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r29", "cat": "خسارت و اتصال آن به پرونده واگذاری", "req": "فرآیند صرفاً متکی به ورود دستی خسارت به پرونده واگذاری نباشد.", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r30", "cat": "عملیات موقت، قطعی و خروجی‌های چاپی", "req": "پرونده‌ها وارد مرحله «عملیات واگذاری اختیاری موقت» شوند و پس از بررسی/ویرایش/تأیید به مرحله قطعی منتقل شوند.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r31", "cat": "عملیات موقت، قطعی و خروجی‌های چاپی", "req": "صورت‌حساب چاپی در سربرگ فارسی بیمه پاسارگاد همراه با تصویر امضای کاربران تهیه شود؛ در دمو مشاهده نشده بود.", "status": "در حال انجام", "note": ""}, {"id": "r32", "cat": "عملیات موقت، قطعی و خروجی‌های چاپی", "req": "جزئیات اصلاحات صورت‌حساب چاپی تکمیل شود (در فایل فقط عنوان آمده است).", "status": "نیاز به ارائه نمونه چاپی از طرف بیمه پاسارگاد", "note": ""}, {"id": "r33", "cat": "عملیات موقت، قطعی و خروجی‌های چاپی", "req": "جزئیات اصلاحات مشخصات و قالب چاپی تحلیل ریسک تکمیل شود (در فایل فقط عنوان آمده است).", "status": "نیاز به ارائه نمونه چاپی از طرف بیمه پاسارگاد", "note": ""}, {"id": "r34", "cat": "بررسی سناریوهای تحلیل ریسک", "req": "فایل «نمایش کلی سناریوها» توسط همکاران ریتون ارسال شده و مستقیماً از سامانه استخراج نشده است.", "status": "انجام شده روی محیط داخلی", "note": ""}, {"id": "r35", "cat": "بررسی سناریوهای تحلیل ریسک", "req": "لازم است امکان انتخاب و تأیید سناریوی نهایی، ثبت نظرات کارشناس و سطوح تأییدکننده و درج مبنای تدوین هر سناریو فراهم شود.", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r36", "cat": "بررسی سناریوهای تحلیل ریسک", "req": "خروجی چاپی جامع باید علاوه بر جدول مقایسه سناریوها، شامل نظرات و تأییدات، سهم هر بیمه‌گر اتکایی و کارمزد مربوطه باشد و مشخصات کامل بیمه‌نامه و الحاقیه بالای جدول سناریوها درج شود.", "status": "نیاز به ارائه نمونه چاپی از طرف بیمه پاسارگاد", "note": ""}, {"id": "r37", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "درج تاریخ صدور مستقل از تاریخ چاپ، نام بیمه پاسارگاد به‌عنوان بیمه‌گر واگذارنده، و نوع عملیات (بیمه‌نامه، الحاقیه اضافی یا برگشتی).", "status": "نیاز به ارائه نمونه چاپی از طرف بیمه پاسارگاد", "note": ""}, {"id": "r38", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "افزودن وضعیت کنسرسیومی بودن، مشخصات بیمه‌گر و بیمه‌نامه راهبر، اعضایی که واگذاری از طرف آنها انجام می‌شود، و جدول تفکیک سهم اعضا (درصد سهم، حق بیمه، کارمزد اتکایی، مالیات کارمزد، خالص نهایی).", "status": "نیاز به ارائه نحوه سند زنی از طرف بیمه پاسارگاد", "note": ""}, {"id": "r39", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "تعیین ارز مبنای صورت‌حساب و نحوه نمایش نرخ تسعیر (رفع ابهام میان نرخ ارز صفر و نرخ توافقی) با تأیید مدیریت مالی.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r40", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "بازطراحی جدول مالی با تأیید مدیریت مالی: حق بیمه واگذاری اضافی/برگشتی، کارمزد اتکایی، مانده پیش از مالیات، مالیات و عوارض کارمزد اتکایی، خالص نهایی، همراه با نام شرکت ذی‌نفع.", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r41", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "نمایش نرخ مالیات به‌صورت درصد صحیح، اصلاح عنوان «مالیات بر ارزش افزوده» به «مالیات و عوارض کارمزد اتکایی»، مشخص‌شدن اثر مالیات بر مبلغ نهایی تسویه، و افزودن جدول حواله‌های مرتبط (شرح، نوع دریافت/پرداخت، سررسید، مبلغ، خالص اثر حواله‌ها).", "status": "نیازمندی مطرح شده در سیستم وجود دارد", "note": ""}, {"id": "r42", "cat": "بررسی صورت‌حساب واگذاری اختیاری ریتون", "req": "حفظ بخش تأییدات فعلی و تکمیل با نام، سمت و تصویر امضای ثبت‌کننده و تأییدکننده.", "status": "در حال انجام", "note": ""}, {"id": "r43", "cat": "بررسی کلی", "req": "اعمال تحلیل ریسک روی بخش‌های بیمه‌نامه (sections)", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r44", "cat": "بررسی کلی", "req": "خسارت معوق", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r45", "cat": "بررسی کلی", "req": "گزارش‌های موردنیاز جهت اتصال به سامانه صدور (جزئیات ساعت و روز اعطای مجوزهای اتکایی)", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r46", "cat": "بررسی کلی", "req": "اعطای مجوزهای اتکایی", "status": "نیاز به جلسه با بیمه پاسارگاد", "note": ""}, {"id": "r47", "cat": "بررسی کلی", "req": "محاسبه و پیش‌بینی حق بیمه واگذاری اختیاری دوره‌های آتی", "status": "نیاز به ارائه نحوه سند زنی از طرف بیمه پاسارگاد", "note": ""}], "readonly": true};
+/* BOOT = {version, updatedAt, updatedBy, label, rows:[{id,cat,req,status,note}], readonly?} */
+
+/* هر وضعیت رنگ مستقل خودش را دارد؛ هیچ گروه‌بندی یا ادغامی بین وضعیت‌ها انجام نمی‌شود */
+var KNOWN = [
+  {k:'done',    re:/انجام شده/,  color:'var(--s-done)',     on:'#fff'},
+  {k:'exists',  re:/وجود دارد/,  color:'var(--s-exists)',   on:'#fff'},
+  {k:'inprog',  re:/در حال/,     color:'var(--s-inprog)',   on:'#1c1a17'},
+  {k:'meeting', re:/جلسه/,       color:'var(--s-meeting)',  on:'#fff'},
+  {k:'print',   re:/چاپی/,       color:'var(--s-print)',    on:'#fff'},
+  {k:'sanad',   re:/سند/,        color:'var(--s-sanad)',    on:'#fff'},
+  {k:'rejected',re:/^رد /,       color:'var(--s-rejected)', on:'#fff'}
+];
+var CANON = ['انجام شده روی محیط داخلی','نیازمندی مطرح شده در سیستم وجود دارد','در حال انجام','نیاز به جلسه با بیمه پاسارگاد','نیاز به ارائه نمونه چاپی از طرف بیمه پاسارگاد','نیاز به ارائه نحوه سند زنی از طرف بیمه پاسارگاد','رد درخواست'];
+function meta(status){
+  for (var i=0;i<KNOWN.length;i++) if (KNOWN[i].re.test(status)) return KNOWN[i];
+  return {k:'other', color:'var(--s-other)', on:'#fff'};
+}
+function isDone(s){return meta(s).k==='done'}
+/* ترتیب ثابت نمایش وضعیت‌ها: به ترتیب فهرست بالا، وضعیت‌های ناشناخته در انتها */
+function stOrder(a,b){
+  var ia=CANON.indexOf(a), ib=CANON.indexOf(b);
+  return (ia<0?99:ia)-(ib<0?99:ib) || (a<b?-1:1);
+}
+
+var SERVER = BOOT || {version:0, rows:[], readonly:true};
+var RAW = clone(SERVER.rows);
+var ORIG = {};
+var REMOVED = {};
+var AUTH = null;
+var OPEN = {};                          /* زیرسیستم‌های باز در بخش ۳ */
+var state = {status:null, cat:null, q:''};
+indexOrig();
+
+var nf = new Intl.NumberFormat('fa-IR');
+var pf = new Intl.NumberFormat('fa-IR',{maximumFractionDigits:1});
+function N(n){return nf.format(n)}
+function NN(n){return new Intl.NumberFormat('fa-IR',{minimumIntegerDigits:2}).format(n)}
+function P(n,t){return t? pf.format(n/t*100)+'٪' : '۰٪'}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function indexOrig(){ORIG={};SERVER.rows.forEach(function(r){ORIG[r.id]=r});REMOVED={}}
+function live(){return RAW.filter(function(r){return !REMOVED[r.id]})}
+function editing(){return document.body.classList.contains('editing')}
+function isDirty(r){var o=ORIG[r.id]; return !o || o.cat!==r.cat || o.req!==r.req || o.status!==r.status || o.note!==r.note}
+function changes(){
+  var c=0; RAW.forEach(function(r){ if(REMOVED[r.id]){ if(ORIG[r.id]) c++; } else if(isDirty(r)) c++; });
+  var ids={}; RAW.forEach(function(r){ids[r.id]=1}); Object.keys(ORIG).forEach(function(id){ if(!ids[id]) c++; });
+  return c;
+}
+function fmtDate(iso){
+  try{var d=new Date(iso);
+    return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{year:'numeric',month:'2-digit',day:'2-digit',timeZone:'Asia/Tehran'}).format(d)+' ساعت '+new Intl.DateTimeFormat('fa-IR',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Asia/Tehran'}).format(d);
+  }catch(e){return ''}
+}
+function updLabel(){
+  if(SERVER.updatedAt) return fmtDate(SERVER.updatedAt)+(SERVER.updatedBy?' · '+SERVER.updatedBy:'');
+  return SERVER.label||'—';
+}
+var toastT;
+function toast(msg,bad){var t=$('toast');t.textContent=msg;t.className='toast show'+(bad?' bad':'');clearTimeout(toastT);toastT=setTimeout(function(){t.className='toast'},4200)}
+
+function tally(rows,key){
+  var order=[], m={};
+  rows.forEach(function(r){var v=r[key]; if(!(v in m)){m[v]=0;order.push(v)} m[v]++});
+  return order.map(function(v){return {name:v,n:m[v]}});
+}
+function catOrder(){ var o=[]; live().forEach(function(r){ if(o.indexOf(r.cat)<0) o.push(r.cat) }); return o; }
+
+function renderSummary(){
+  var rowsAll=live(), total=rowsAll.length, cats=tally(rowsAll,'cat');
+  var sts=tally(rowsAll,'status').sort(function(a,b){return stOrder(a.name,b.name)});
+  $('tcount').textContent=N(total); $('ccount').textContent=N(cats.length); $('upd').textContent=updLabel();
+  if(!total){['tiles','insights','donut','subs','legend'].forEach(function(id){$(id).innerHTML=''});$('dn').textContent='۰';$('dt').textContent='نیازمندی';return}
+
+  /* کاشی هر وضعیت، بدون ادغام */
+  $('tiles').innerHTML=sts.map(function(s){
+    var m=meta(s.name);
+    return '<button class="tile" type="button" data-status="'+esc(s.name)+'" aria-pressed="'+(state.status===s.name)+'" style="--c:'+m.color+'"><span class="name">'+esc(s.name)+'</span><span class="pct">'+P(s.n,total)+'</span><span class="cnt">'+N(s.n)+' نیازمندی از '+N(total)+'</span><span class="track"><i style="width:'+(s.n/total*100)+'%"></i></span></button>';
+  }).join('');
+
+  /* نمودار حلقه‌ای */
+  var acc=0, svg='<circle r="15.9155" cx="21" cy="21" style="stroke:var(--line);cursor:default;stroke-width:6.5"></circle>';
+  sts.forEach(function(s){
+    var v=s.n/total*100, m=meta(s.name), d=Math.max(v-0.6,0.2);
+    svg+='<circle class="'+(state.status===s.name?'on':'')+'" r="15.9155" cx="21" cy="21" pathLength="100" stroke-dasharray="'+d+' '+(100-d)+'" stroke-dashoffset="'+(-acc)+'" style="stroke:'+m.color+'" data-status="'+esc(s.name)+'" tabindex="0" role="button"><title>'+esc(s.name)+' — '+N(s.n)+' مورد ('+P(s.n,total)+')</title></circle>';
+    acc+=v;
+  });
+  $('donut').innerHTML=svg;
+  $('donut').classList.toggle('has-sel',!!state.status);
+  var sel=state.status&&sts.filter(function(s){return s.name===state.status})[0];
+  $('dn').textContent=sel?P(sel.n,total):N(total);
+  $('dt').textContent=sel?sel.name:'نیازمندی';
+
+  /* نکات کلیدی: فقط بر پایه‌ی وضعیت‌های تکی */
+  var rates=cats.map(function(c){var rows=rowsAll.filter(function(r){return r.cat===c.name});return {name:c.name,n:c.n,done:rows.filter(function(r){return isDone(r.status)}).length}});
+  var top=sts.slice().sort(function(a,b){return b.n-a.n})[0];
+  var best=rates.slice().sort(function(a,b){return b.done/b.n-a.done/a.n||b.n-a.n})[0];
+  var zero=rates.filter(function(r){return r.done===0});
+  var worst=rates.slice().sort(function(a,b){return a.done/a.n-b.done/b.n||b.n-a.n})[0];
+  var ins='';
+  ins+='<div class="ins" style="--ic:'+meta(top.name).color+'"><span class="k">پرتکرارترین وضعیت</span>«'+esc(top.name)+'» با <b>'+N(top.n)+' مورد</b> ('+P(top.n,total)+').</div>';
+  ins+='<div class="ins" style="--ic:var(--s-done)"><span class="k">بیشترین «انجام شده»</span>«'+esc(best.name)+'» با <b>'+P(best.done,best.n)+'</b> ('+N(best.done)+' از '+N(best.n)+').</div>';
+  ins+= zero.length
+    ? '<div class="ins" style="--ic:var(--s-rejected)"><span class="k">بدون هیچ مورد «انجام شده»</span>'+zero.map(function(z){return '«'+esc(z.name)+'»'}).join('، ')+'.</div>'
+    : '<div class="ins" style="--ic:var(--s-rejected)"><span class="k">کمترین «انجام شده»</span>«'+esc(worst.name)+'» با <b>'+P(worst.done,worst.n)+'</b> ('+N(worst.done)+' از '+N(worst.n)+').</div>';
+  $('insights').innerHTML=ins;
+
+  /* بخش ۲ */
+  $('subs').innerHTML=rates.map(function(c,i){
+    var rows=rowsAll.filter(function(r){return r.cat===c.name});
+    var segs=sts.map(function(s){
+      var n=rows.filter(function(r){return r.status===s.name}).length; if(!n) return '';
+      var m=meta(s.name);
+      return '<button class="seg" type="button" style="flex:'+n+';--c:'+m.color+';--on:'+m.on+'" data-cat="'+esc(c.name)+'" data-status="'+esc(s.name)+'" title="'+esc(s.name)+' — '+N(n)+' مورد" aria-label="'+esc(c.name+'، '+s.name+'، '+N(n)+' مورد')+'">'+N(n)+'</button>';
+    }).join('');
+    return '<div class="sub"><span class="ix">'+NN(i+1)+'</span><button class="sub-name" type="button" data-cat="'+esc(c.name)+'">'+esc(c.name)+'<small>'+N(c.n)+' نیازمندی</small></button><div class="bar">'+segs+'</div><div class="sub-pct">'+P(c.done,c.n)+'<small>انجام شده</small></div></div>';
+  }).join('');
+  $('legend').innerHTML=sts.map(function(s){return '<span><i class="dot" style="--c:'+meta(s.name).color+'"></i>'+esc(s.name)+'</span>'}).join('');
+}
+
+function statusOptions(cur){
+  var all=CANON.slice(); RAW.forEach(function(r){ if(all.indexOf(r.status)<0) all.push(r.status) });
+  if(cur && all.indexOf(cur)<0) all.push(cur);
+  return all.map(function(s){return '<option'+(s===cur?' selected':'')+'>'+esc(s)+'</option>'}).join('');
+}
+function rowHTML(r,no){
+  var m=meta(r.status);
+  if(!editing()){
+    return '<article class="req" data-id="'+esc(r.id)+'" style="--c:'+m.color+'"><div class="no">'+N(no)+'</div><div class="tx">'+esc(r.req)+'</div><span class="pill" style="--c:'+m.color+'"><i class="dot" style="--c:'+m.color+'"></i>'+esc(r.status)+'</span>'+(r.note?'<div class="note"><b>توضیحات</b>'+esc(r.note)+'</div>':'')+'</article>';
+  }
+  var cls='req ed'+(REMOVED[r.id]?' removed':'')+(!ORIG[r.id]?' new':(isDirty(r)?' dirty':''));
+  return '<article class="'+cls+'" data-id="'+esc(r.id)+'" style="--c:'+m.color+'"><div class="no">'+N(no)+'</div>'+
+    '<textarea class="tx-in" data-f="req" aria-label="شرح نیازمندی '+N(no)+'" placeholder="شرح نیازمندی">'+esc(r.req)+'</textarea>'+
+    '<div class="side"><span class="lbl-s">آخرین وضعیت</span><select data-f="status" style="--c:'+m.color+'" aria-label="وضعیت نیازمندی '+N(no)+'">'+statusOptions(r.status)+'</select>'+
+    '<button class="rm" type="button" data-act="rm">'+(REMOVED[r.id]?'بازگرداندن':'حذف')+'</button></div>'+
+    '<textarea class="nt" data-f="note" aria-label="توضیحات نیازمندی '+N(no)+'" placeholder="توضیحات (اختیاری)">'+esc(r.note)+'</textarea></article>';
+}
+function filtersOn(){return !!(state.status||state.cat||state.q.trim())}
+function renderList(){
+  var q=state.q.trim();
+  var nums={}; RAW.forEach(function(r,i){nums[r.id]=i+1});
+  var rows=RAW.filter(function(r){
+    if(REMOVED[r.id]&&!editing()) return false;
+    if(state.status&&r.status!==state.status) return false;
+    if(state.cat&&r.cat!==state.cat) return false;
+    if(q&&(r.req+' '+r.note+' '+r.status+' '+r.cat).indexOf(q)<0) return false;
+    return true;
+  });
+  var chips='';
+  if(state.status) chips+='<button class="chip" type="button" data-clear="status"><i class="dot" style="--c:'+meta(state.status).color+'"></i>وضعیت: '+esc(state.status)+' ✕</button>';
+  if(state.cat) chips+='<button class="chip" type="button" data-clear="cat">زیرسیستم: '+esc(state.cat)+' ✕</button>';
+  $('chips').innerHTML=chips;
+  var L=live().length, shown=rows.filter(function(r){return !REMOVED[r.id]}).length;
+  $('count').textContent=filtersOn()? N(shown)+' نیازمندی از '+N(L)+' با فیلتر فعلی' : N(L)+' نیازمندی در '+N(catOrder().length)+' زیرسیستم';
+  if(!rows.length){$('list').innerHTML='<div class="empty">با این فیلترها موردی پیدا نشد. «حذف فیلترها» را بزنید.</div>';return}
+
+  var order=catOrder(); RAW.forEach(function(r){ if(order.indexOf(r.cat)<0) order.push(r.cat) });
+  var groups=order.map(function(c){return {cat:c,items:rows.filter(function(r){return r.cat===c})}}).filter(function(g){return g.items.length});
+  var allOpen=true;
+  $('list').innerHTML=groups.map(function(g){
+    var ix=order.indexOf(g.cat)+1, act=g.items.filter(function(r){return !REMOVED[r.id]});
+    var open=filtersOn()||editing()||!!OPEN[g.cat]; if(!open) allOpen=false;
+    var full=live().filter(function(r){return r.cat===g.cat}), done=full.filter(function(r){return isDone(r.status)}).length;
+    var bar=tally(full,'status').sort(function(a,b){return stOrder(a.name,b.name)}).map(function(s){return '<i style="flex:'+s.n+';--c:'+meta(s.name).color+'" title="'+esc(s.name)+': '+N(s.n)+'"></i>'}).join('');
+    var sub=filtersOn()? N(act.length)+' از '+N(full.length)+' نیازمندی' : N(full.length)+' نیازمندی · '+N(done)+' انجام شده';
+    return '<section class="sys'+(open?' open':'')+'" data-sys="'+esc(g.cat)+'">'+
+      '<div class="sys-h"><button class="sys-t" type="button" data-act="toggle" aria-expanded="'+open+'">'+
+        '<span class="sys-ix">'+NN(ix)+'</span><span class="sys-name">'+esc(g.cat)+'<small>'+sub+'</small></span><span class="sys-bar" aria-hidden="true">'+bar+'</span><span class="chev" aria-hidden="true">▾</span></button>'+
+        (editing()?'<button class="sys-add" type="button" data-act="add" data-cat="'+esc(g.cat)+'">+ نیازمندی</button>':'')+
+      '</div><div class="sys-body">'+g.items.map(function(r){return rowHTML(r,nums[r.id])}).join('')+'</div></section>';
+  }).join('');
+  $('toggleall').textContent=allOpen?'بستن همه':'باز کردن همه';
+  $('toggleall').disabled=filtersOn()||editing();
+}
+function renderState(){
+  var c=changes();
+  $('estate').innerHTML='حالت ویرایش · '+esc(AUTH?AUTH.name:'')+' · '+(c?'<b>'+N(c)+' تغییر ذخیره‌نشده</b>':'بدون تغییر');
+  $('save').disabled=!c; $('discard').disabled=!c;
+}
+function render(scroll){
+  renderSummary(); renderList(); if(editing()) renderState();
+  if(scroll) $('details').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function openSys(cat){
+  OPEN[cat]=1; render(false);
+  var el=document.querySelector('.sys[data-sys="'+(window.CSS&&CSS.escape?CSS.escape(cat):cat)+'"]');
+  if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* کلیک‌ها: فیلتر وضعیت، رفتن به زیرسیستم، باز و بسته کردن */
+document.addEventListener('click',function(e){
+  var a=e.target.closest('[data-act]');
+  if(a){ onAct(a); return; }
+  var t=e.target.closest('[data-status],[data-cat],[data-clear]'); if(!t||t.tagName==='SELECT') return;
+  if(t.dataset.clear){state[t.dataset.clear]=null;render(false);return}
+  var s=t.dataset.status, c=t.dataset.cat;
+  if(s&&c){state.status=s;state.cat=c;render(true);return}
+  if(s){state.status=(state.status===s?null:s);state.cat=null;render(true);return}
+  if(c){state.status=null;state.cat=null;state.q='';$('q').value='';openSys(c);return}
+});
+document.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches('.donut circle[data-status]')){e.preventDefault();e.target.dispatchEvent(new MouseEvent('click',{bubbles:true}))}
+  if(e.key==='Escape'){document.querySelectorAll('.modal.open').forEach(function(m){m.classList.remove('open')})}
+});
+$('q').addEventListener('input',function(e){state.q=e.target.value;renderList()});
+$('clear').addEventListener('click',function(){state={status:null,cat:null,q:''};$('q').value='';render(false)});
+$('toggleall').addEventListener('click',function(){
+  var cats=catOrder(), all=cats.every(function(c){return OPEN[c]});
+  OPEN={}; if(!all) cats.forEach(function(c){OPEN[c]=1}); renderList();
+});
+
+/* ویرایش ردیف‌ها */
+function rowById(id){for(var i=0;i<RAW.length;i++) if(RAW[i].id===id) return RAW[i]}
+function markRow(el,r){ el.classList.toggle('dirty',!!ORIG[r.id]&&isDirty(r)&&!REMOVED[r.id]); }
+$('list').addEventListener('input',function(e){
+  var f=e.target.dataset.f; if(!f||f==='status') return;
+  var el=e.target.closest('.req'), r=rowById(el.dataset.id); if(!r) return;
+  r[f]=e.target.value; markRow(el,r); renderState();
+});
+$('list').addEventListener('change',function(e){
+  if(e.target.dataset.f!=='status') return;
+  var el=e.target.closest('.req'), r=rowById(el.dataset.id); if(!r) return;
+  r.status=e.target.value; var c=meta(r.status).color;
+  e.target.style.setProperty('--c',c); el.style.setProperty('--c',c);
+  markRow(el,r); renderSummary(); renderState();
+});
+function onAct(a){
+  var act=a.dataset.act;
+  if(act==='toggle'){
+    var sys=a.closest('.sys'), cat=sys.dataset.sys;
+    if(filtersOn()||editing()){ sys.classList.toggle('open'); a.setAttribute('aria-expanded',sys.classList.contains('open')); return; }
+    if(OPEN[cat]) delete OPEN[cat]; else OPEN[cat]=1; renderList(); return;
+  }
+  if(act==='rm'){
+    var el=a.closest('.req'), id=el.dataset.id;
+    if(!ORIG[id]){ RAW=RAW.filter(function(x){return x.id!==id}); }
+    else { if(REMOVED[id]) delete REMOVED[id]; else REMOVED[id]=1; }
+    render(false); return;
+  }
+  if(act==='add'){ addRow(a.dataset.cat); return; }
+  if(act==='restore'){ restore(+a.dataset.v,a); return; }
+}
+function newId(){return 'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function addRow(cat){
+  var last=-1; RAW.forEach(function(r,i){if(r.cat===cat) last=i});
+  var r={id:newId(),cat:cat,req:'',status:'در حال انجام',note:''};
+  if(last<0) RAW.push(r); else RAW.splice(last+1,0,r);
+  state={status:null,cat:cat,q:''}; $('q').value=''; OPEN[cat]=1;
+  render(false);
+  var ta=document.querySelector('.req[data-id="'+r.id+'"] textarea'); if(ta){ta.focus();ta.scrollIntoView({block:'center'})}
+}
+
+/* ورود */
+function openM(id){$(id).classList.add('open');var f=$(id).querySelector('input');if(f)setTimeout(function(){f.focus()},30)}
+function closeM(id){$(id).classList.remove('open')}
+document.querySelectorAll('[data-close]').forEach(function(b){b.addEventListener('click',function(){b.closest('.modal').classList.remove('open')})});
+document.querySelectorAll('.modal').forEach(function(m){m.addEventListener('click',function(e){if(e.target===m) m.classList.remove('open')})});
+
+$('editbtn').addEventListener('click',function(){
+  if(SERVER.readonly){toast('ذخیره‌سازی آنلاین فعال نیست. این نسخه فقط برای مشاهده است.',true);return}
+  if(editing()){return}
+  $('lg-err').textContent=''; try{$('lg-name').value=localStorage.getItem('vg-name')||''}catch(e){}
+  openM('m-login');
+});
+$('lg-form').addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=$('lg-name').value.trim(), pw=$('lg-pw').value;
+  if(!name||!pw) return;
+  $('lg-go').disabled=true; $('lg-err').textContent='';
+  api('POST','/api/login',null,pw).then(function(){
+    AUTH={pw:pw,name:name}; try{localStorage.setItem('vg-name',name)}catch(e){}
+    $('lg-pw').value=''; closeM('m-login');
+    document.body.classList.add('editing'); $('editbtn').hidden=true;
+    return refresh(true);
+  }).catch(function(err){ $('lg-err').textContent=err.message; }).then(function(){$('lg-go').disabled=false});
+});
+$('exit').addEventListener('click',function(){
+  if(changes()&&!confirmInline('تغییرات ذخیره‌نشده از بین می‌رود. دوباره «خروج از ویرایش» را بزنید.')) return;
+  AUTH=null; document.body.classList.remove('editing'); $('editbtn').hidden=false;
+  RAW=clone(SERVER.rows); indexOrig(); render(false);
+});
+var armed=null;
+function confirmInline(msg){ if(armed&&Date.now()-armed<6000){armed=null;return true} armed=Date.now(); toast(msg,true); return false }
+$('discard').addEventListener('click',function(){
+  if(!confirmInline('برای لغو همه‌ی تغییرات، دوباره «لغو تغییرات» را بزنید.')) return;
+  RAW=clone(SERVER.rows); indexOrig(); render(false); toast('تغییرات لغو شد.');
+});
+$('addcat').addEventListener('click',function(){ $('ct-name').value=''; openM('m-cat'); });
+$('ct-form').addEventListener('submit',function(e){
+  e.preventDefault(); var n=$('ct-name').value.trim(); if(!n) return;
+  closeM('m-cat'); addRow(n);
+});
+
+/* ارتباط با سرور */
+function api(method,path,body,pw){
+  var h={'Content-Type':'application/json'}; if(pw) h['Authorization']='Bearer '+pw;
+  return fetch(path,{method:method,headers:h,body:body?JSON.stringify(body):undefined,cache:'no-store'}).then(function(res){
+    return res.json().catch(function(){return {}}).then(function(j){
+      if(!res.ok){var e=new Error(j.error||('خطای سرور ('+res.status+')'));e.status=res.status;e.data=j;throw e}
+      return j;
+    });
+  }, function(){ throw new Error('ارتباط با سرور برقرار نشد. اینترنت را بررسی کنید.') });
+}
+function adopt(d){ SERVER=d; RAW=clone(d.rows); indexOrig(); render(false); }
+function refresh(quiet){ return api('GET','/api/data').then(function(d){ adopt(d); if(!quiet) toast('آخرین نسخه بارگذاری شد.'); }) }
+
+$('save').addEventListener('click',function(){
+  if(!AUTH) return;
+  var rows=live().map(function(r){return {id:r.id,cat:r.cat.trim(),req:r.req.trim(),status:r.status,note:(r.note||'').trim()}});
+  var bad=rows.filter(function(r){return !r.req});
+  if(bad.length){toast(N(bad.length)+' نیازمندی متن ندارد. متن را بنویسید یا آن ردیف را حذف کنید.',true);return}
+  $('save').disabled=true; $('save').textContent='در حال ذخیره…';
+  api('PUT','/api/data',{baseVersion:SERVER.version,updatedBy:AUTH.name,rows:rows},AUTH.pw).then(function(d){
+    adopt(d); toast('ذخیره شد. نسخه '+N(d.version)+' منتشر شد.');
+  }).catch(function(err){
+    if(err.status===409 && err.data && err.data.current){
+      rebase(err.data.current);
+      toast('همکار دیگری در این فاصله نسخه '+N(err.data.current.version)+' را ذخیره کرده بود. تغییرات شما روی نسخه‌ی جدید اعمال شد؛ بررسی کنید و دوباره ذخیره کنید.',true);
+    }
+    else if(err.status===401){toast('رمز معتبر نیست. دوباره وارد شوید.',true);}
+    else toast(err.message,true);
+  }).then(function(){ $('save').textContent='ذخیره و انتشار'; renderState(); });
+});
+/* تغییرات کاربر (بر اساس شناسه‌ی هر بند) روی نسخه‌ی جدیدتر سرور دوباره اعمال می‌شود */
+function rebase(d){
+  var edits=[], adds=[], rem=Object.keys(REMOVED);
+  RAW.forEach(function(r){ if(!ORIG[r.id]) adds.push(clone(r)); else if(isDirty(r)) edits.push(clone(r)); });
+  SERVER=d; RAW=clone(d.rows); indexOrig();
+  edits.forEach(function(e){ var r=rowById(e.id); if(r){r.cat=e.cat;r.req=e.req;r.status=e.status;r.note=e.note} });
+  rem.forEach(function(id){ if(ORIG[id]) REMOVED[id]=1 });
+  adds.forEach(function(a){ RAW.push(a) });
+  render(false);
+}
+
+$('histbtn').addEventListener('click',function(){
+  $('hs-err').textContent=''; $('hs-list').innerHTML='<div>در حال بارگذاری…</div>'; openM('m-hist');
+  api('GET','/api/history',null,AUTH.pw).then(function(h){
+    $('hs-list').innerHTML = h.items.length ? h.items.map(function(it){
+      return '<div><span>نسخه '+N(it.version)+' · '+esc(fmtDate(it.updatedAt))+(it.updatedBy?' · '+esc(it.updatedBy):'')+' · '+N(it.count)+' بند</span>'+
+        (it.version===SERVER.version?'<b>فعلی</b>':'<button class="btn ghost" type="button" data-act="restore" data-v="'+it.version+'">بازگردانی</button>')+'</div>';
+    }).join('') : '<div>هنوز نسخه‌ای ذخیره نشده است.</div>';
+  }).catch(function(err){$('hs-err').textContent=err.message});
+});
+function restore(v,btn){
+  if(changes()){ $('hs-err').textContent='اول تغییرات ذخیره‌نشده را ذخیره یا لغو کنید.'; return; }
+  btn.disabled=true;
+  api('POST','/api/restore',{version:v,baseVersion:SERVER.version,updatedBy:AUTH.name},AUTH.pw).then(function(d){
+    adopt(d); closeM('m-hist'); toast('نسخه '+N(v)+' بازگردانی و به‌عنوان نسخه '+N(d.version)+' منتشر شد.');
+  }).catch(function(err){ $('hs-err').textContent=err.message; btn.disabled=false; });
+}
+
+window.addEventListener('beforeunload',function(e){ if(editing()&&changes()){e.preventDefault();e.returnValue='';} });
+
+/* جایگزینی کامل با اکسل جدید (در حالت ویرایش؛ بعد باید ذخیره شود) */
+$('upbtn').addEventListener('click',function(){$('file').click()});
+$('file').addEventListener('change',function(e){
+  var f=e.target.files[0]; if(!f) return; e.target.value='';
+  toast('در حال خواندن فایل…');
+  function parse(){
+    f.arrayBuffer().then(function(buf){
+      var wb=XLSX.read(buf,{type:'array'}), ws=wb.Sheets[wb.SheetNames[0]];
+      var a=XLSX.utils.sheet_to_json(ws,{header:1,defval:''}), out=[], cat='';
+      for(var i=1;i<a.length;i++){
+        var r=a[i], c0=String(r[0]||'').trim(), req=String(r[1]||'').replace(/\s+/g,' ').trim();
+        if(c0) cat=c0; if(!req) continue;
+        out.push({id:newId(),cat:cat||'بدون زیرسیستم',req:req,status:String(r[2]||'').trim()||'در حال انجام',note:String(r[3]||'').trim()});
+      }
+      if(!out.length) throw new Error('empty');
+      RAW.forEach(function(r){ if(ORIG[r.id]) REMOVED[r.id]=1; });
+      RAW=RAW.filter(function(r){return ORIG[r.id]}).concat(out);
+      state={status:null,cat:null,q:''}; $('q').value='';
+      render(false);
+      toast(N(out.length)+' نیازمندی از «'+f.name+'» خوانده شد. برای انتشار «ذخیره و انتشار» را بزنید.');
+    }).catch(function(){toast('فایل خوانده نشد. برگه‌ی اول باید چهار ستون «زیرسیستم، نیازمندی، آخرین وضعیت، توضیحات» را داشته باشد.',true)});
+  }
+  if(window.XLSX) return parse();
+  var s=document.createElement('script');
+  s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+  s.onload=parse; s.onerror=function(){toast('کتابخانه‌ی خواندن اکسل بارگذاری نشد.',true)};
+  document.head.appendChild(s);
+});
+
+render(false);
+</script>
+</body>
+</html>
